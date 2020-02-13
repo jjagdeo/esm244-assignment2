@@ -1,0 +1,94 @@
+---
+title: "Assignment 2 Task 2"
+author: "Jessica Jagdeo"
+date: "2/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+1. A useful descriptive introductory summary (3 - 4 sentences) of what’s contained in the project
+
+2. Image(s), with captions and necessary citation(s), of Bonneville Dam and/or steelhead (or whatever time series data you choose to explore)
+
+3. All of your organized and well-annotated code (with warnings/messages hidden) used to create at least:
+
+A finalized time series plot of the original observations (daily data)
+A finalized seasonplot to explore if/how monthly passage has shifted over time (I totaled counts by month before doing this...you can choose if you want to do that)
+A finalized visualization of annual steelhead passage counts 
+
+4. Make sure that your figures appear in your final knitted document, each with a useful caption. Include text associated with each to help the audience understand and interpret the results. 
+
+```{r}
+
+knitr::include_graphics("bonneville_dam.jpg")
+
+```
+**Figure 1. Bonneville Dam, Oregon.** Photo source: Pixabay. 
+
+#### 1. Load necessary packages.
+```{r}
+
+library(tidyverse)
+library(janitor)
+library(kableExtra)
+library(naniar)
+library(skimr)
+library(sf)
+library(tmap)
+library(paletteer)
+library(lubridate)
+
+# For ts stuff: 
+library(tsibble)
+library(fable)
+library(fabletools)
+library(feasts)
+library(forecast)
+
+```
+
+#### 2. Read in the data: steelhead salmon passage across the Bonneville Dam (Oregon) from 1940 - 2019
+
+```{r}
+
+salmon <- read_csv("cbr_fish_passage_bonneville_allyrs_steelhead.csv") %>% 
+  clean_names() %>% 
+  mutate(date = paste(year, mm_dd, sep = "-")) %>% 
+  mutate(date_new = lubridate::parse_date_time(date, "ydm")) 
+
+# Look for NAs
+
+gg_miss_var(salmon)
+
+# Remove NAs
+
+salmon_clean <- salmon %>% 
+  drop_na(value, date_new) %>% 
+  select(year, date_new, value)
+  
+```
+
+```{r}
+
+salmon_plot <- ggplot(salmon_clean, aes(x = date_new, 
+                                   y = value)) +
+  geom_line() +
+  theme_classic() +
+  labs(x = "Date",
+       y = "Salmon Count")
+  
+salmon_plot
+
+```
+
+```{r}
+
+salmon_ts <- as_tsibble(salmon_clean, key = value, index = date_new)
+
+```
+
