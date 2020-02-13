@@ -70,3 +70,25 @@ ggplot(data = watershed) +
 
 ```
 
+```{r}
+
+hawaii_clip <- st_intersection(watershed, lulc)
+
+hawaii_clip_tmap <- tm_basemap("Esri.WorldImagery") + # Put in a basemap
+  tm_shape(hawaii_clip) +
+  tm_fill("landcover", palette = c("orange", "purple", "yellow"), alpha = 0.5) +
+  tm_borders("red") +
+  tm_layout(
+  "Land Use/Land Cover per Watershed",
+  legend.title.size=1,
+  legend.text.size = 0.6,
+  legend.position = c("left","bottom"),
+  legend.bg.color = "white",
+  legend.bg.alpha = 1)
+
+tmap_mode("view") # Sets it to interactive view
+
+hawaii_clip_tmap
+
+```
+
