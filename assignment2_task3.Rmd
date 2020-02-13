@@ -51,40 +51,34 @@ watershed <- read_sf(dsn = here(".", "Watersheds"),
 
 lulc <- read_sf(dsn = here(".", "Land_Use_Land_Cover_LULC"),
                 layer = "Land_Use_Land_Cover_LULC") %>% 
-              st_transform(crs = 6628)
+              st_transform(crs = 6628) %>% 
+  filter(landcover != 0)
 
 ```
 
 #### 3. Create an interactive map of the watersheds and land use/land cover for the Big Island of Hawaii 
 ```{r}
 
-ggplot(data = watershed) +
-  geom_sf(color = "black", 
-          size = 0.1) +
-  geom_sf(data = lulc,
-          aes(fill = landcover),
-          alpha = 0.5,
-          color = "NA",
-          show.legend = FALSE) +
-  theme_minimal()
+# ggplot(data = watershed) +
+#   geom_sf(color = "black", 
+#           size = 0.1) +
+#   geom_sf(data = lulc,
+#           aes(fill = landcover),
+#           alpha = 0.5,
+#           color = "NA",
+#           show.legend = FALSE) +
+#   theme_minimal()
 
 ```
 
 ```{r}
 
-hawaii_clip <- st_intersection(watershed, lulc)
-
 hawaii_clip_tmap <- tm_basemap("Esri.WorldImagery") + # Put in a basemap
-  tm_shape(hawaii_clip) +
-  tm_fill("landcover", palette = c("orange", "purple", "yellow"), alpha = 0.5) +
-  tm_borders("red") +
-  tm_layout(
-  "Land Use/Land Cover per Watershed",
-  legend.title.size=1,
-  legend.text.size = 0.6,
-  legend.position = c("left","bottom"),
-  legend.bg.color = "white",
-  legend.bg.alpha = 1)
+  tm_shape(watershed) +
+  tm_borders("lightblue", lwd = .5) +
+  tm_shape(lulc) +
+  tm_fill("landcover", title = "Land Cover", palette = c("orange", "purple", "blue", "yellow"), alpha = 0.5) +
+  tm_layout("Land Use/Land Cover for Watersheds of the Hawaiian Islands") 
 
 tmap_mode("view") # Sets it to interactive view
 
