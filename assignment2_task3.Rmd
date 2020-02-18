@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE)
 ```
 
+This project displays an interactive land use/land cover and watershed distribution map of the Hawaiian Islands. This map can be utilized to determine the composition of the land use and land cover within a specific watershed. This can be useful for hydrological modeling projects within Hawaiian watersheds. 
+
 For Task 3, make a map of land use / land cover and watersheds for the big island of Hawaii.
 
 Familiarize yourself with the data attributes (see link), and download the shapefile data for each. After reading the shapefile data into R, make finalized map(s) in which you: 
@@ -47,42 +49,31 @@ library(here)
 
 watershed <- read_sf(dsn = here(".", "Watersheds"),
                  layer = "Watersheds") %>% 
-              st_transform(crs = 6628)
+              st_transform(crs = 6628) # Set the coordinate reference system 
 
 lulc <- read_sf(dsn = here(".", "Land_Use_Land_Cover_LULC"),
                 layer = "Land_Use_Land_Cover_LULC") %>% 
               st_transform(crs = 6628) %>% 
-  filter(landcover != 0)
+  filter(landcover != 0) # Remove land use/land cover category of 0
 
 ```
 
-#### 3. Create an interactive map of the watersheds and land use/land cover for the Big Island of Hawaii 
-```{r}
-
-# ggplot(data = watershed) +
-#   geom_sf(color = "black", 
-#           size = 0.1) +
-#   geom_sf(data = lulc,
-#           aes(fill = landcover),
-#           alpha = 0.5,
-#           color = "NA",
-#           show.legend = FALSE) +
-#   theme_minimal()
-
-```
-
-```{r}
+#### 3. Create an interactive map of the watersheds and land use/land cover for the Hawaiian Islands
+```{r, out.width = '100%'}
 
 hawaii_clip_tmap <- tm_basemap("Esri.WorldImagery") + # Put in a basemap
   tm_shape(watershed) +
   tm_borders("lightblue", lwd = .5) +
   tm_shape(lulc) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
   tm_fill("landcover", title = "Land Cover", palette = c("orange", "purple", "blue", "yellow"), alpha = 0.5) +
-  tm_layout("Land Use/Land Cover for Watersheds of the Hawaiian Islands") 
+  tm_layout("Land Use/Land Cover for Watersheds of the Hawaiian Islands")
 
 tmap_mode("view") # Sets it to interactive view
 
 hawaii_clip_tmap
 
+
 ```
 
+**Figure 1. Land use/land cover and watershed distribution of the Hawaiian Islands.** Data source: Hawaiian Statewide GIS Program. 
