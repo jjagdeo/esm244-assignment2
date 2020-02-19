@@ -11,22 +11,9 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE)
 ```
 
-This project displays an interactive land use/land cover and watershed distribution map of the Hawaiian Islands. This map can be utilized to determine the composition of the land use and land cover within a specific watershed. This can be useful for hydrological modeling projects within Hawaiian watersheds. 
 
-For Task 3, make a map of land use / land cover and watersheds for the big island of Hawaii.
+This project displays an interactive agricultural land use/land cover and watershed distribution map of the Hawaiian Islands. This map can be utilized to determine the composition of agricultural land use and land cover within a specific watershed. This can be useful for hydrological modeling projects in predominantly agricultural regions within Hawaiian watersheds. 
 
-Familiarize yourself with the data attributes (see link), and download the shapefile data for each. After reading the shapefile data into R, make finalized map(s) in which you: 
-
-1. Clearly and professionally show the different land use / land cover types for all main Hawaiian islands, or for an island or region of your choosing
-2. Clearly and professionally show the different watersheds for all main Hawaiian islands, or for an island or region of your choosing
-
-There is flexibility! You can decide: 
-
-1. Do you want your maps to be static or interactive?
-What areas do you want to focus on? 
-2. Do you want to show land use/landcover and watersheds in a single map or in separate maps? 
-
-Whatever you decide is great, just make sure that your final outputs are presented in a nice professional HTML that you’d be proud to share with someone so that they can see your awesome spatial code! 
 
 #### 1. Load necessary packages.
 ```{r}
@@ -49,31 +36,40 @@ library(here)
 
 watershed <- read_sf(dsn = here(".", "Watersheds"),
                  layer = "Watersheds") %>% 
-              st_transform(crs = 6628) # Set the coordinate reference system 
+              st_transform(crs = 4326) # Set the coordinate reference system 
 
 lulc <- read_sf(dsn = here(".", "Land_Use_Land_Cover_LULC"),
                 layer = "Land_Use_Land_Cover_LULC") %>% 
-              st_transform(crs = 6628) %>% 
-  filter(landcover != 0) # Remove land use/land cover category of 0
+              st_transform(crs = 4326) %>% 
+  filter(landcover == "Cropland and Pasture" |
+           landcover == "Shrub and Brush Rangeland" |
+           landcover == "Orchards, Groves, Vineyards, Nurseries and Ornamental Horticultural Areas" |
+           landcover == "Herbaceous Rangeland" |
+           landcover == "Mixed Rangeland" |
+           landcover == "Other Agricultural Land") # For the purposes of this map, interested in displaying rangeland and agricultural areas, so filtering out other land covers
 
 ```
 
 #### 3. Create an interactive map of the watersheds and land use/land cover for the Hawaiian Islands
-```{r, out.width = '100%'}
 
-hawaii_clip_tmap <- tm_basemap("Esri.WorldImagery") + # Put in a basemap
+```{r, out.width = "100%"}
+
+hawaii_tmap <- tm_basemap("Esri.WorldImagery") + # Put in a basemap
   tm_shape(watershed) +
   tm_borders("lightblue", lwd = .5) +
   tm_shape(lulc) +
-  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
-  tm_fill("landcover", title = "Land Cover", palette = c("orange", "purple", "blue", "yellow"), alpha = 0.5) +
-  tm_layout("Land Use/Land Cover for Watersheds of the Hawaiian Islands")
+  tm_fill("landcover", 
+          title = "Land Cover", 
+          palette = c("orange", "purple", "blue", "yellow"), 
+          alpha = 0.5) +
+  tm_layout("Agricultural Land Use/Land Cover for Watersheds of the Hawaiian Islands") +
+  tm_view(view.legend.position = c("left", "bottom"))
 
 tmap_mode("view") # Sets it to interactive view
 
-hawaii_clip_tmap
-
+hawaii_tmap
 
 ```
 
-**Figure 1. Land use/land cover and watershed distribution of the Hawaiian Islands.** Data source: Hawaiian Statewide GIS Program. 
+
+**Figure 1. Agricultural land use/land cover and watershed distribution of the Hawaiian Islands.** Data source: Hawaiian Statewide GIS Program. 
